@@ -126,12 +126,19 @@ __attribute__((vector(12), interrupt(IPL2SOFT), nomips16)) void InterrupcionT3(v
     static uint32_t tick = 0, ticks = 0, seg = 0, segu = 0;
 
     IFS0bits.T3IF = 0;
+<<<<<<< HEAD
     if (Ah n == 1)
     { // Solo cuenta si abierta
         ticks++;
         if (ticks >= 2000)
         { // 1 seg, ticks
             seg++;
+=======
+    if ( puerta_abierta == 1) { // Solo cuenta si abierta
+        ticks ++;
+        if (ticks >= 2000) { // 1 seg, ticks
+            seg ++;
+>>>>>>> eb5207db44d446c82c55e4f36444daabfab07741
             ticks = 0;
         }
     }
@@ -155,6 +162,7 @@ __attribute__((vector(12), interrupt(IPL2SOFT), nomips16)) void InterrupcionT3(v
     if (seg >= 30)
     { // 30s
         cerrarPuerta();
+        seg=0;
     }
 }
 void abrirPuerta(void)
