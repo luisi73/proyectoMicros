@@ -128,7 +128,7 @@ void InterrupcionT3 (void) {
     static uint32_t tick=0,ticks = 0, seg = 0,segu=0;
     
     IFS0bits.T3IF = 0;
-    if ( Ah n == 1) { // Solo cuenta si abierta
+    if ( puerta_abierta == 1) { // Solo cuenta si abierta
         ticks ++;
         if (ticks >= 2000) { // 1 seg, ticks
             seg ++;
@@ -150,6 +150,7 @@ void InterrupcionT3 (void) {
     
     if (seg >= 30) { //30s
         cerrarPuerta();
+        seg=0;
     }
 }
 void abrirPuerta(void)
