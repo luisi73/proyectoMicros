@@ -22,10 +22,12 @@ UART. */
 #include <xc.h>
 #include <stdio.h>
 #include "UART1.h"
-
+#include "I2C.h"
 #define TAM_COLA 100
 
 #define PIN_PULSADOR 5
+
+#define PIN_PRESENCIA 8
 
 #define PIN_RX 13
 #define PIN_TX 7
@@ -44,6 +46,7 @@ static cola_t tx, rx;
 
 void InicializarPines(int baudios)
 {
+    
     rx.icabeza = 0;
     rx.icola = 0;
     tx.icabeza = 0;
@@ -76,9 +79,10 @@ void InicializarPines(int baudios)
     IPC8bits.U1IS = 1;   // Subprio 1
 
     // Conectamos U1RX y U1TX a los sus pines respectivos de la placa del micro-proc
+    ANSELA &= ~(1<<PIN_PRESENCIA);
     ANSELB &= ~((1 << PIN_RX) | (1 << PIN_TX)); // Pines digitales
 
-    TRISA = 0;
+    TRISA |= (1<<PIN_PRESENCIA);
     TRISB |= ((1 << PIN_RX) | (1 << PIN_PULSADOR)); // Receptor es una entrada en el micro-proc
     TRISC = 0;
 
@@ -126,19 +130,10 @@ __attribute__((vector(12), interrupt(IPL2SOFT), nomips16)) void InterrupcionT3(v
     static uint32_t tick = 0, ticks = 0, seg = 0, segu = 0;
 
     IFS0bits.T3IF = 0;
-<<<<<<< HEAD
-    if (Ah n == 1)
-    { // Solo cuenta si abierta
-        ticks++;
-        if (ticks >= 2000)
-        { // 1 seg, ticks
-            seg++;
-=======
     if ( puerta_abierta == 1) { // Solo cuenta si abierta
         ticks ++;
         if (ticks >= 2000) { // 1 seg, ticks
             seg ++;
->>>>>>> eb5207db44d446c82c55e4f36444daabfab07741
             ticks = 0;
         }
     }
@@ -318,7 +313,7 @@ void verif(char s[])
 
     for (i = 0; i < len; i++)
     {
-        if (!strcmp(pines_acceso[i], s_sub5)) // Se devuelve un 0 si los strings son iguales
+        if(!strcmp(pines_acceso[i], s_sub5) && (PORTB>>PIN_PRESENCIA)==1) // Se devuelve un 0 si los strings son iguales
         {
             LATCSET = 0xF;
             // Do your stuff
@@ -371,7 +366,7 @@ void verif(char s[])
 void checkPasswordSystem(char s[])
 {
     char system_password[] = "*1CA11CA1";
-    char string_name[];
+//    char * string_name[];
     // Mide 9 caracteres por lo tanto:
     //  Codigos de PINES Codigos de ejemplo: 1234A, 2151B
     int i;
@@ -384,17 +379,18 @@ void checkPasswordSystem(char s[])
 
     if(!strcmp(system_password, s_sub9))
     {
-        putsUART("\n======= Menú del Sistema =======\n");
-        putsUART("\n Los usuarios registrados que tiene a continuación son:\n ");
+        putsUART("\n======= Menu del Sistema =======\n");
+        /*putsUART("\n Los usuarios registrados que tiene a continuación son:\n ");
         for(i = 0; i < sizeof(nombres_pines);i++)
         {
-            string_name = nombres_pines[i];
+            string_name[i]= nombres_pines[i];
+            
             putsUART(string_name);
             putsUART("\n\n");
-        }
+        }*/
 
         putsUART("=========================\n");
-        putsUART("¿Cuales de las siguientes opciones desea elegir?\n1. Modificar contraseña\n2. Añadir usuario\n3. Eliminar usuario");
+        putsUART("¿Cuales de las siguientes opciones desea elegir?\n1. Modificar contrasenia\n2. Añadir usuario\n3. Eliminar usuario");
         
     }
 }

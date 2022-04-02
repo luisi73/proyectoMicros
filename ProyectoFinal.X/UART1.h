@@ -22,6 +22,7 @@ void verif(char s[]);
 void setErrorCounter(int counter);
 void plusErrorCounter(int add_num);
 int getErrorCounter(void);
+void checkPasswordSystem(char s[]);
 
 #ifdef	__cplusplus
 }

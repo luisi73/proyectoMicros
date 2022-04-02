@@ -15,6 +15,7 @@ devolviendo con putsUART el resultado de dicho comando. */
 #include <string.h>
 #include "Pic32Ini.h"
 #include "UART1.h"
+#include "I2C.h"
 
 #define INC_90_GRADOS 2502 // cada 139 cuentas se giran 10º
 #define BAUDIOS 9600
@@ -50,7 +51,9 @@ int main (void)
         {
             //Fin del comando, pasamos a interpretar el resultado
             i = 0; 
+            //verif(charmander);
             verif(charmander);
+            checkPasswordSystem(charmander);
         }
         
         
