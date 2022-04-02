@@ -21,13 +21,12 @@ UART. */
 
 #include <xc.h>
 #include <stdio.h>
+#include <string.h>
 #include "UART1.h"
 #include "I2C.h"
 #define TAM_COLA 100
 
 #define PIN_PULSADOR 5
-
-#define PIN_PRESENCIA 8
 
 #define PIN_RX 13
 #define PIN_TX 7
@@ -79,10 +78,9 @@ void InicializarPines(int baudios)
     IPC8bits.U1IS = 1;   // Subprio 1
 
     // Conectamos U1RX y U1TX a los sus pines respectivos de la placa del micro-proc
-    ANSELA &= ~(1<<PIN_PRESENCIA);
     ANSELB &= ~((1 << PIN_RX) | (1 << PIN_TX)); // Pines digitales
 
-    TRISA |= (1<<PIN_PRESENCIA);
+    TRISA = 0;
     TRISB |= ((1 << PIN_RX) | (1 << PIN_PULSADOR)); // Receptor es una entrada en el micro-proc
     TRISC = 0;
 
@@ -291,11 +289,13 @@ int charToInt(char c)
     Cambiamos el estado de un pin, si valor = 1 <- LATxSET, en cambio si es 0, LATxCLR
 */
 static int error_counter;
-static char *pines_acceso[] = {"1234A", "2151B", "6969C"};
-static char *nombres_pines[] = {"Yago", "Luis", "Chema"};
+static char *pines_acceso[] = {"1234A", "2151B", "6969C","*1CA1"};
+static char *nombres_pines[] = {"Yago", "Luis", "Chema","Admin"};
+static char *pin_admin[] = {"*1CA11CA1"};
 
 void verif(char s[])
 {
+    
     // Codigos de PINES Codigos de ejemplo: 1234A, 2151B
     int len = sizeof(pines_acceso) / sizeof(pines_acceso[0]);
     int i;
@@ -310,38 +310,67 @@ void verif(char s[])
     puerta_abierta = 0;
     polis = 0;
     asm("ei");
+    
 
     for (i = 0; i < len; i++)
     {
-        if(!strcmp(pines_acceso[i], s_sub5) && (PORTB>>PIN_PRESENCIA)==1) // Se devuelve un 0 si los strings son iguales
+        
+        if(!strcmp(pines_acceso[i], s_sub5)) // Se devuelve un 0 si los strings son iguales
         {
             LATCSET = 0xF;
             // Do your stuff
-            putsUART("\nCodigo veridico, pase a casa");
             if (strcmp(pines_acceso[0], s_sub5) == 0)
             {
+                putsUART("\nCodigo veridico, pase a casa");
+                
                 putsUART("\nBienvenido a casa, YAGO");
+                abrirPuerta();
+                asm("di");
+                puerta_abierta = 1;
+                asm("ei");
             }
-            else if (strcmp(pines_acceso[1], s_sub5))
+            else if (strcmp(pines_acceso[1], s_sub5)== 0)
             {
+                putsUART("\nCodigo veridico, pase a casa");
+                
                 putsUART("\nBienvenido a casa, LUIS");
+                abrirPuerta();
+                asm("di");
+                puerta_abierta = 1;
+                asm("ei");
             }
-            else if (strcmp(pines_acceso[2], s_sub5))
+            else if (strcmp(pines_acceso[2], s_sub5)== 0)
             {
+                putsUART("\nCodigo veridico, pase a casa");
+                
                 putsUART("\nChema, te queremos. NICE");
+                abrirPuerta();
+                asm("di");
+                puerta_abierta = 1;
+                asm("ei");
+            }else if (strcmp(pines_acceso[3], s_sub5)== 0)
+            {
+                char search[] = "*1CA11CA1";
+                char *ptr = strstr(s, search);
+                
+                if(ptr != NULL){
+                    changePasswordSystem();
+                    break;
+                }else{
+                    putsUART("\nCodigo Incorrecto, a la siguiente llamo a la policia");
+                    plusErrorCounter(1);
+                    LATCCLR = 0xF;
+                    cerrarPuerta();
+                }
+                break;
             }
-
-            abrirPuerta();
-            asm("di");
-            puerta_abierta = 1;
-            asm("ei");
             break;
         }
         else
         {
             if (getErrorCounter() == 3)
             {
-                putsUART("\nYa es la 3� vez que metes el codigo mal. Llamando a la policia");
+                putsUART("\nYa es la tercera vez que metes el codigo mal. Llamando a la policia");
                 setErrorCounter(0);
                 cerrarPuerta();
                 asm("di");
@@ -361,38 +390,24 @@ void verif(char s[])
             }
         }
     }
+        
 }
 
-void checkPasswordSystem(char s[])
+void changePasswordSystem(void)
 {
-    char system_password[] = "*1CA11CA1";
-//    char * string_name[];
-    // Mide 9 caracteres por lo tanto:
-    //  Codigos de PINES Codigos de ejemplo: 1234A, 2151B
     int i;
-    char s_sub9[8];
-
-    for (i = 0; i < 9; i++)
+    char *temp;
+    putsUART("\n======= Menu del Sistema =======\n");
+    putsUART("\n Los usuarios registrados que tiene a continuacion son:\n ");
+    /*for(i = 0; i < sizeof(nombres_pines);i++)
     {
-        s_sub9[i] = s[i];
-    }
+        temp=nombres_pines[i];
+        putsUART(temp);
+    }*/
 
-    if(!strcmp(system_password, s_sub9))
-    {
-        putsUART("\n======= Menu del Sistema =======\n");
-        /*putsUART("\n Los usuarios registrados que tiene a continuación son:\n ");
-        for(i = 0; i < sizeof(nombres_pines);i++)
-        {
-            string_name[i]= nombres_pines[i];
-            
-            putsUART(string_name);
-            putsUART("\n\n");
-        }*/
+    putsUART("==================================\n");
+    putsUART("�Cuales de las siguientes opciones desea elegir?\n1. Modificar contrasenia\n2. Añadir usuario\n3. Eliminar usuario");
 
-        putsUART("=========================\n");
-        putsUART("¿Cuales de las siguientes opciones desea elegir?\n1. Modificar contrasenia\n2. Añadir usuario\n3. Eliminar usuario");
-        
-    }
 }
 
 void setErrorCounter(int counter)

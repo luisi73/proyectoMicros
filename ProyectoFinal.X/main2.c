@@ -25,21 +25,20 @@ int main (void)
 {
     int pulsador_ant, pulsador_act;
     int t_alto = 2500; // Tiempo en alto de la salida (1 ms)
-
     InicializarPines(BAUDIOS);
     
-    INTCONbits .MVEC = 1; // Modo multivector
+    INTCONbits.MVEC = 1; // Modo multivector
     asm("ei"); // Interr. Habilitadas
     //El tamaño del comando mas largo es de 9 caracteres
     char charmander[10], caracter;
     int i = 0; 
-
     pulsador_ant = (PORTB>>PIN_PULSADOR) & 1;
     while(1)
     {
         //Recepcion 
         caracter = getcUART();
-
+        
+        
         if(caracter != '\0')
         {
             //Vamos asignando las letras 
@@ -51,11 +50,9 @@ int main (void)
         {
             //Fin del comando, pasamos a interpretar el resultado
             i = 0; 
-            //verif(charmander);
             verif(charmander);
-            checkPasswordSystem(charmander);
+            
         }
-        
         
         // Se lee el estado del pulsador
         pulsador_act = (PORTB>>PIN_PULSADOR) & 1;
