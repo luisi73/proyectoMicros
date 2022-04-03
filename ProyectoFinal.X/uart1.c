@@ -28,6 +28,8 @@ UART. */
 
 #define PIN_PULSADOR 5
 
+#define PIN_ZUMBADOR 1
+
 #define PIN_RX 13
 #define PIN_TX 7
 
@@ -79,12 +81,13 @@ void InicializarPines(int baudios)
 
     // Conectamos U1RX y U1TX a los sus pines respectivos de la placa del micro-proc
     ANSELB &= ~((1 << PIN_RX) | (1 << PIN_TX)); // Pines digitales
-
+    ANSELA |= (1<<PIN_ZUMBADOR);
+    
     TRISA = 0;
     TRISB |= ((1 << PIN_RX) | (1 << PIN_PULSADOR)); // Receptor es una entrada en el micro-proc
     TRISC = 0;
 
-    LATA = 0;
+    LATA &= ~(1<<PIN_ZUMBADOR);
     LATB |= 1 << PIN_TX; // A 1 si el transmisor esta inhabilitado
     LATC = 0xF;          // Apagamos todos los LEDS (Activos a nivel Bajo)
 
@@ -125,8 +128,9 @@ void InicializarPines(int baudios)
 
 __attribute__((vector(12), interrupt(IPL2SOFT), nomips16)) void InterrupcionT3(void)
 {
-    static uint32_t tick = 0, ticks = 0, seg = 0, segu = 0;
-
+    static uint32_t sound=0, tick = 0, ticks = 0, seg = 0;
+    uint16_t tiempo_millis = 0;
+    int sube_baja = 1;
     IFS0bits.T3IF = 0;
     if ( puerta_abierta == 1) { // Solo cuenta si abierta
         ticks ++;
@@ -143,12 +147,24 @@ __attribute__((vector(12), interrupt(IPL2SOFT), nomips16)) void InterrupcionT3(v
 
     if (polis == 1)
     {
+        tiempo_millis += sube_baja;
+        //En el caso de que lleguemos al limite de los latidos del pulsador
+        if (tiempo_millis == 20 || tiempo_millis == 0)
+        {
+            //Sea cual sea el valor, si es 1, pues bajará. 
+            //Si es -1, pues subirá.
+            sube_baja *= -1;
+        }
         tick++;
+        sound++;
         if (tick >= 2000)
         {
-            segu++;
             tick = 0;
             LATCINV = 0xF;
+        }
+        if(sound>=(10-tiempo_millis)){
+            LATAINV=(1<<PIN_ZUMBADOR);
+            sound=0;
         }
     }
 
@@ -295,7 +311,6 @@ static char *pin_admin[] = {"*1CA11CA1"};
 
 void verif(char s[])
 {
-    
     // Codigos de PINES Codigos de ejemplo: 1234A, 2151B
     int len = sizeof(pines_acceso) / sizeof(pines_acceso[0]);
     int i;
@@ -317,6 +332,7 @@ void verif(char s[])
         
         if(!strcmp(pines_acceso[i], s_sub5)) // Se devuelve un 0 si los strings son iguales
         {
+            LATACLR=(1<<PIN_ZUMBADOR);
             LATCSET = 0xF;
             // Do your stuff
             if (strcmp(pines_acceso[0], s_sub5) == 0)
@@ -381,6 +397,7 @@ void verif(char s[])
             }
             else if (i == (len - 1))
             {
+                LATACLR=(1<<PIN_ZUMBADOR);
                 putsUART("\nCodigo Incorrecto, a la siguiente llamo a la policia");
                 plusErrorCounter(1);
                 LATCCLR = 0xF;
