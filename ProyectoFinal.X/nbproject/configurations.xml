@@ -214,6 +214,9 @@
       <PK3OBPlatformTool>
         <property key="firmware.download.all" value="false"/>
       </PK3OBPlatformTool>
+      <Tool>
+        <property key="firmware.download.all" value="false"/>
+      </Tool>
       <item path="servo.c" ex="true" overriding="false">
         <C32>
         </C32>
