@@ -28,10 +28,18 @@ UART. */
 
 #define PIN_PULSADOR 5
 
+#define PIN_PRESENCIA 14
+
 #define PIN_ZUMBADOR 1
 
 #define PIN_RX 13
 #define PIN_TX 7
+
+
+//Son los PINES EN RC
+#define PIN_R 7
+#define PIN_G 8
+#define PIN_B 9
 
 uint8_t puerta_abierta = 0;
 uint8_t polis = 0;
@@ -80,16 +88,17 @@ void InicializarPines(int baudios)
     IPC8bits.U1IS = 1;   // Subprio 1
 
     // Conectamos U1RX y U1TX a los sus pines respectivos de la placa del micro-proc
-    ANSELB &= ~((1 << PIN_RX) | (1 << PIN_TX)); // Pines digitales
+    ANSELB &= ~((1 << PIN_RX) | (1 << PIN_TX) | (1 << PIN_PRESENCIA)); // Pines digitales
     ANSELA |= (1<<PIN_ZUMBADOR);
+    ANSELC &= ~((1 << PIN_R ) | (1 << PIN_G) | (1<< PIN_B));
     
     TRISA = 0;
-    TRISB |= ((1 << PIN_RX) | (1 << PIN_PULSADOR)); // Receptor es una entrada en el micro-proc
+    TRISB |= ((1 << PIN_RX) | (1 << PIN_PULSADOR) | (1 << PIN_PRESENCIA)); // Receptor es una entrada en el micro-proc
     TRISC = 0;
 
     LATA &= ~(1<<PIN_ZUMBADOR);
     LATB |= 1 << PIN_TX; // A 1 si el transmisor esta inhabilitado
-    LATC = 0xF;          // Apagamos todos los LEDS (Activos a nivel Bajo)
+    LATC = ~(0x380);          // Apagamos todos los LEDS (Activos a nivel Bajo)
 
     SYSKEY = 0xAA996655; // Desbloqueamos los regs.
     SYSKEY = 0x556699AA;
@@ -159,10 +168,13 @@ __attribute__((vector(12), interrupt(IPL2SOFT), nomips16)) void InterrupcionT3(v
         sound++;
         if (tick >= 2000)
         {
-            tick = 0;
-            LATCINV = 0xF;
+            tick = 0;           
+            LATCINV = 0x200;
+            
+        }else{
+            LATCINV = 0x80;            
         }
-        if(sound>=(10-tiempo_millis)){
+        if(sound>=(2-tiempo_millis)){
             LATAINV=(1<<PIN_ZUMBADOR);
             sound=0;
         }
@@ -329,16 +341,17 @@ void verif(char s[])
 
     for (i = 0; i < len; i++)
     {
-        
+        LATCCLR = 0x380;
         if(!strcmp(pines_acceso[i], s_sub5)) // Se devuelve un 0 si los strings son iguales
         {
+            setErrorCounter(0);
             LATACLR=(1<<PIN_ZUMBADOR);
             LATCSET = 0xF;
             // Do your stuff
             if (strcmp(pines_acceso[0], s_sub5) == 0)
             {
                 putsUART("\nCodigo veridico, pase a casa");
-                
+                LATCSET = 0x100;
                 putsUART("\nBienvenido a casa, YAGO");
                 abrirPuerta();
                 asm("di");
@@ -348,7 +361,7 @@ void verif(char s[])
             else if (strcmp(pines_acceso[1], s_sub5)== 0)
             {
                 putsUART("\nCodigo veridico, pase a casa");
-                
+                LATCSET = 0x100;
                 putsUART("\nBienvenido a casa, LUIS");
                 abrirPuerta();
                 asm("di");
@@ -387,7 +400,6 @@ void verif(char s[])
             if (getErrorCounter() == 3)
             {
                 putsUART("\nYa es la tercera vez que metes el codigo mal. Llamando a la policia");
-                setErrorCounter(0);
                 cerrarPuerta();
                 asm("di");
                 polis = 1;
@@ -397,10 +409,10 @@ void verif(char s[])
             }
             else if (i == (len - 1))
             {
+                LATCCLR = 0x380;
                 LATACLR=(1<<PIN_ZUMBADOR);
                 putsUART("\nCodigo Incorrecto, a la siguiente llamo a la policia");
                 plusErrorCounter(1);
-                LATCCLR = 0xF;
                 cerrarPuerta();
 
                 break;
@@ -421,7 +433,7 @@ void changePasswordSystem(void)
         temp=nombres_pines[i];
         putsUART(temp);
     }*/
-
+    LATCSET = 0x180;
     putsUART("==================================\n");
     putsUART("¿Cuales de las siguientes opciones desea elegir?\n1. Modificar contrasenia\n2. AÃ±adir usuario\n3. Eliminar usuario");
 
