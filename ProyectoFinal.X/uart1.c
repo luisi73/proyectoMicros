@@ -348,6 +348,7 @@ void verif(char s[])
             }
             else if (strcmp(pines_acceso[2], s_sub5)== 0)
             {   
+                LATCSET = 0x100;
                 putsUART("\nChema, te queremos. NICE");
                 abrirPuerta();
                 asm("di");
@@ -371,15 +372,15 @@ void verif(char s[])
             }
             break;
         }
-        else
+        else if(i == (len - 1))
         {
-            /*if(getErrorCounter() == 1)
+            if(getErrorCounter() == 1)
             {
                 putsUART("\nEs la segunda vez que se inserta un codigo incorrecto.\n");
+                plusErrorCounter(1);
                 cerrarPuerta();
                 break;
-            }*/
-            if (getErrorCounter() == 2)
+            }else if (getErrorCounter() == 2)
             {
                 putsUART("\nYa es la tercera vez que metes el codigo mal. Llamando a la policia");
                 cerrarPuerta();
@@ -389,16 +390,12 @@ void verif(char s[])
                 // Insertar codigo de Buzzer y cosa externa
                 break;
             }
-            if (i == (len - 1))
-            {
-                LATCCLR = 0x380;
-                LATACLR=(1<<PIN_ZUMBADOR);
-                putsUART("\nCodigo Incorrecto");
-                plusErrorCounter(1);
-                cerrarPuerta();
-
-                break;
-            }
+            
+            LATCCLR = 0x380;
+            LATACLR=(1<<PIN_ZUMBADOR);
+            putsUART("\nCodigo Incorrecto");
+            plusErrorCounter(1);
+            cerrarPuerta();
         }
     }
         
