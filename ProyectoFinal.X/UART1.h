@@ -30,8 +30,8 @@ char* convertIntegerToChar(int N);
 void menuSelect(void);
 void selectOption(char s[]);
 void modifyPin(void);
-void newUser(void);
-void deleteUser(void);
+void selectUser(char s[]);
+void changePin(char s[]);
 
 #ifdef	__cplusplus
 }

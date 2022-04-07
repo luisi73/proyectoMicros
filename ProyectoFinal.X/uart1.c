@@ -284,25 +284,11 @@ int charToInt(char c)
         return -1;
 }
 
-/* Comandos a cubrir:
-    PD, <puerto>, <pin>, <direccion> \n
-          A/B/C   , 0 - F, 0/1
-    En caso de que los parametros sean correctos, "OK\n", else "Error\n"
-    Encargado de asignar la direccion de un pin como entrada o salida
 
-    PI, <puerto>, <pin> \n
-        A/B/C   ,  0 - F
-    Devuelve el estado de un pin (Es decir, que hace un PORTB >> pin & 0x1)
-    En formato PI, 1 \n <- Si esta encendido
-
-    PO, <puerto>, <pin>, <valor> \n
-        A/B/C       0-F  1/0
-    Cambiamos el estado de un pin, si valor = 1 <- LATxSET, en cambio si es 0, LATxCLR
-*/
-static int error_counter, select_option = 0, menu_setting = 0;
-static char *pines_acceso[] = {"1234A", "2151B", "6969C", "*1CA1"};
-static char *nombres_pines[] = {"Yago", "Luis", "Chema", "Admin"};
-static char *pin_admin[] = {"*1CA11CA1"};
+static int error_counter, select_option = 0, select_user = 0, select_pin=0, user_selected;
+static char pines_acceso[][10] = {"1234A", "2151B", "6969C", "*1CA1"};
+static char nombres_pines[][10] = {"Yago", "Luis", "Chema", "Admin"};
+static char pin_admin[][10] = {"*1CA11CA1"};
 
 void verif(char s[])
 {
@@ -316,17 +302,18 @@ void verif(char s[])
         s_sub5[i] = s[i];
     }
 
-    if (menu_setting == 1)
+    if (select_option == 1)
     {
-        menuSelect();
-    }
-    else if (select_option == 1)
+        selectOption(s_sub5);
+    }else if(select_user == 1)
     {
-        selectOption(s);
+        selectUser(s_sub5);   
+    }else if(select_pin == 1)
+    {
+        changePin(s_sub5);
     }
     else
     {
-
         asm("di");
         puerta_abierta = 0;
         polis = 0;
@@ -335,7 +322,7 @@ void verif(char s[])
         for (i = 0; i < len; i++)
         {
             LATCCLR = 0x380;
-            if (!strcmp(pines_acceso[i], s_sub5)) // Se devuelve un 0 si los strings son iguales
+            if (!strcmp(pines_acceso[i], s_sub5) && !(PORTB >> PIN_PRESENCIA)&1) // Se devuelve un 0 si los strings son iguales
             {
                 setErrorCounter(0);
                 LATACLR = (1 << PIN_ZUMBADOR);
@@ -389,7 +376,7 @@ void verif(char s[])
                 }
                 break;
             }
-            else if (i == (len - 1))
+            else if (i == (len - 1)&& !(PORTB >> PIN_PRESENCIA)&1)
             {
                 if (getErrorCounter() == 1)
                 {
@@ -414,85 +401,105 @@ void verif(char s[])
                 putsUART("\nCodigo Incorrecto");
                 plusErrorCounter(1);
                 cerrarPuerta();
+            }else if(i == (len - 1)){
+                LATCCLR = 0x380;
+                LATACLR = (1 << PIN_ZUMBADOR);
+                putsUART("\nAcercate a la puerta");
+                cerrarPuerta();
             }
         }
     }
 }
 
-static char pines_acceso_test[][10] = {"1234A", "2151B", "6969C"};
-static char nombres_pines_test[][10] = {"Yago", "Luis", "Chema", "Admin"};
-static char pin_admin_test[][10] = {"*1CA11CA1"};
-
 void menuIntro(void)
 {
     LATCSET = 0x180;
-    int i;
-    char option_select;
     putsUART("\n== Menu del Sistema ==\n");
-    putsUART("Usuarios del sistema:\n");
 
-    for (i = 0; i < sizeof(nombres_pines_test) / sizeof(nombres_pines_test[0]); i++)
-    {
-        putsUART(nombres_pines_test[i]);
-        putsUART("\n");
-    }
-    putsUART("Inserte * para continuar\n");
-    // Para poder pasar a la selecciÃ³n de las opciones del menu
-    menu_setting = 1; //<- Descomentar para activar para que al escribir caracteres pasemos al otro
-}
-
-void menuSelect(void)
-{
-    putsUART("\nOpciones\n");
     putsUART("1.Modificar PIN\n");
-    putsUART("2.Nuevo usuario\n");
-    putsUART("3.Eliminar usuario\n");
-    putsUART("4.Salir\n");
-    select_option = 1;
-    menu_setting = 0;
-};
+    putsUART("2.Mostrar usuarios\n");
+    putsUART("3.Salir\n");
+    // Para poder pasar a la selecciÃ³n de las opciones del menu
+    select_option = 1; //<- Descomentar para activar para que al escribir caracteres pasemos al otro
+}
 
 void selectOption(char s[])
 {
-    //Debemos de verificar lo que se le pasa al micro como funcion y despues
+    // Debemos de verificar lo que se le pasa al micro como funcion y despues
     char s_c[0];
     int option;
-    s_c[0]=s[0];
-     //Select option para que no vaya a verif 
+    s_c[0] = s[0];
+    // Select option para que no vaya a verif
     option = charToInt(s_c[0]);
 
-    if(option == 1)
+    if (option == 1)
     {
-        putsUART("Opcion 1");
         modifyPin();
-    }else if(option == 2)
+    }
+    else if (option == 2)
     {
-        newUser();
-    }else if(option == 3)
-    {
-        deleteUser(); 
-    }else if(option == 4)
+       mostarUsuarios();
+    }
+    else if (option == 3)
     {
         putsUART("\nSaliendo del Menu...\n");
         select_option = 0;
-    }else
+    }
+    else
     {
         putsUART("\nOpcion Incorrecta. Saliendo del Menu");
         select_option = 0;
     }
 };
 
+void mostarUsuarios(void)
+{
+    putsUART("\nUsuarios del sistema:\n");
+    int i;
+    for (i = 0; i < sizeof(nombres_pines) / sizeof(nombres_pines[0]); i++)
+    {
+        putsUART(nombres_pines[i]);
+        putsUART("\n");
+    }
+}
+
 void modifyPin(void){
-
+  putsUART("Usuarios del sistema:\n");
+    int i;
+    char text[2];
+    for (i = 0; i < sizeof(nombres_pines) / sizeof(nombres_pines[0]); i++)
+    {
+        sprintf(text,"%d", i+1);
+        putsUART(text);
+        putsUART(". ");
+        putsUART(nombres_pines[i]);
+        putsUART("\n");
+    }
+  putsUART("\n¿De que usuario quiere cambiar el PIN?\n");
+  select_user = 1;
+  select_option = 0;
 };
 
-void newUser(void){
+void selectUser(char s[])
+{
+    //Reseteamos para que no se vuelva a meter en la función.
+    select_user=0;
+    user_selected = charToInt(s[0]);
+    putsUART("INSERTAR NUEVO PIN\nDeben de tener longitud 5");
+    select_pin = 1;
+    //Recibimos el nombre de 4 caracteres
+}
 
-};
+void changePin(char s[])
+{
+    putsUART(s);
+    strcpy(pines_acceso[user_selected-1],s);
+    putsUART("PIN CAMBIADO");
+    select_pin = 0;
+    select_option = 0;
+    select_user = 0;
+}
 
-void deleteUser(void){
-
-};
 
 void setErrorCounter(int counter)
 {
@@ -516,3 +523,52 @@ int getErrorCounter(void)
     asm("   ei");
     return c_error_counter;
 }
+
+
+/*
+// You must free the result if result is non-NULL.
+char *str_replace(char *orig, char *rep, char *with) {
+    char *result; // the return string
+    char *ins;    // the next insert point
+    char *tmp;    // varies
+    int len_rep;  // length of rep (the string to remove)
+    int len_with; // length of with (the string to replace rep with)
+    int len_front; // distance between rep and end of last rep
+    int count;    // number of replacements
+
+    // sanity checks and initialization
+    if (!orig || !rep)
+        return NULL;
+    len_rep = strlen(rep);
+    if (len_rep == 0)
+        return NULL; // empty rep causes infinite loop during count
+    if (!with)
+        with = "";
+    len_with = strlen(with);
+
+    // count the number of replacements needed
+    ins = orig;
+    for (count = 0; tmp = strstr(ins, rep); ++count) {
+        ins = tmp + len_rep;
+    }
+
+    tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
+
+    if (!result)
+        return NULL;
+
+    // first time through the loop, all the variable are set correctly
+    // from here on,
+    //    tmp points to the end of the result string
+    //    ins points to the next occurrence of rep in orig
+    //    orig points to the remainder of orig after "end of rep"
+    while (count--) {
+        ins = strstr(orig, rep);
+        len_front = ins - orig;
+        tmp = strncpy(tmp, orig, len_front) + len_front;
+        tmp = strcpy(tmp, with) + len_with;
+        orig += len_front + len_rep; // move to next "end of rep"
+    }
+    strcpy(tmp, orig);
+    return result;
+}*/
