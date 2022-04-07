@@ -15,8 +15,7 @@
 #define PIN_RX 13
 #define PIN_TX 7
 
-
-//Son los PINES EN RC
+// Son los PINES EN RC
 #define PIN_R 7
 #define PIN_G 8
 #define PIN_B 9
@@ -35,7 +34,7 @@ static cola_t tx, rx;
 
 void InicializarPines(int baudios)
 {
-    
+
     rx.icabeza = 0;
     rx.icola = 0;
     tx.icabeza = 0;
@@ -69,16 +68,16 @@ void InicializarPines(int baudios)
 
     // Conectamos U1RX y U1TX a los sus pines respectivos de la placa del micro-proc
     ANSELB &= ~((1 << PIN_RX) | (1 << PIN_TX) | (1 << PIN_PRESENCIA)); // Pines digitales
-    ANSELA |= (1<<PIN_ZUMBADOR);
-    ANSELC &= ~((1 << PIN_R ) | (1 << PIN_G) | (1<< PIN_B));
-    
+    ANSELA |= (1 << PIN_ZUMBADOR);
+    ANSELC &= ~((1 << PIN_R) | (1 << PIN_G) | (1 << PIN_B));
+
     TRISA = 0;
     TRISB |= ((1 << PIN_RX) | (1 << PIN_PULSADOR) | (1 << PIN_PRESENCIA)); // Receptor es una entrada en el micro-proc
     TRISC = 0;
 
-    LATA &= ~(1<<PIN_ZUMBADOR);
+    LATA &= ~(1 << PIN_ZUMBADOR);
     LATB |= 1 << PIN_TX; // A 1 si el transmisor esta inhabilitado
-    LATC = ~(0x380);          // Apagamos todos los LEDS (Activos a nivel Bajo)
+    LATC = ~(0x380);     // Apagamos todos los LEDS (Activos a nivel Bajo)
 
     SYSKEY = 0xAA996655; // Desbloqueamos los regs.
     SYSKEY = 0x556699AA;
@@ -117,14 +116,16 @@ void InicializarPines(int baudios)
 
 __attribute__((vector(12), interrupt(IPL2SOFT), nomips16)) void InterrupcionT3(void)
 {
-    static uint32_t sound=0, tick = 0, ticks = 0, seg = 0;
+    static uint32_t sound = 0, tick = 0, ticks = 0, seg = 0;
     uint16_t tiempo_millis = 0;
     int sube_baja = 1;
     IFS0bits.T3IF = 0;
-    if ( puerta_abierta == 1) { // Solo cuenta si abierta
-        ticks ++;
-        if (ticks >= 2000) { // 1 seg, ticks
-            seg ++;
+    if (puerta_abierta == 1)
+    { // Solo cuenta si abierta
+        ticks++;
+        if (ticks >= 2000)
+        { // 1 seg, ticks
+            seg++;
             ticks = 0;
         }
     }
@@ -137,33 +138,35 @@ __attribute__((vector(12), interrupt(IPL2SOFT), nomips16)) void InterrupcionT3(v
     if (polis == 1)
     {
         tiempo_millis += sube_baja;
-        //En el caso de que lleguemos al limite de los latidos del pulsador
+        // En el caso de que lleguemos al limite de los latidos del pulsador
         if (tiempo_millis == 20 || tiempo_millis == 0)
         {
-            //Sea cual sea el valor, si es 1, pues bajar�. 
-            //Si es -1, pues subir�.
+            // Sea cual sea el valor, si es 1, pues bajar�.
+            // Si es -1, pues subir�.
             sube_baja *= -1;
         }
         tick++;
         sound++;
         if (tick >= 2000)
         {
-            tick = 0;           
+            tick = 0;
             LATCINV = 0x200;
-            
-        }else{
-            LATCINV = 0x80;            
         }
-        if(sound>=(2-tiempo_millis)){
-            LATAINV=(1<<PIN_ZUMBADOR);
-            sound=0;
+        else
+        {
+            LATCINV = 0x80;
+        }
+        if (sound >= (2 - tiempo_millis))
+        {
+            LATAINV = (1 << PIN_ZUMBADOR);
+            sound = 0;
         }
     }
 
     if (seg >= 30)
     { // 30s
         cerrarPuerta();
-        seg=0;
+        seg = 0;
     }
 }
 void abrirPuerta(void)
@@ -296,9 +299,9 @@ int charToInt(char c)
         A/B/C       0-F  1/0
     Cambiamos el estado de un pin, si valor = 1 <- LATxSET, en cambio si es 0, LATxCLR
 */
-static int error_counter,select_option=0 , menu_setting=0;
-static char *pines_acceso[] = {"1234A", "2151B", "6969C","*1CA1"};
-static char *nombres_pines[] = {"Yago", "Luis", "Chema","Admin"};
+static int error_counter, select_option = 0, menu_setting = 0;
+static char *pines_acceso[] = {"1234A", "2151B", "6969C", "*1CA1"};
+static char *nombres_pines[] = {"Yago", "Luis", "Chema", "Admin"};
 static char *pin_admin[] = {"*1CA11CA1"};
 
 void verif(char s[])
@@ -312,104 +315,112 @@ void verif(char s[])
     {
         s_sub5[i] = s[i];
     }
-    
-    if(menu_setting==1){
-        menuSelect();
-        
-    }else if(select_option==1){
-        selectOption(s);
-    }else{
-    
-    asm("di");
-    puerta_abierta = 0;
-    polis = 0;
-    asm("ei");
-    
 
-    for (i = 0; i < len; i++)
+    if (menu_setting == 1)
     {
-        LATCCLR = 0x380;
-        if(!strcmp(pines_acceso[i], s_sub5)) // Se devuelve un 0 si los strings son iguales
+        menuSelect();
+    }
+    else if (select_option == 1)
+    {
+        selectOption(s);
+    }
+    else
+    {
+
+        asm("di");
+        puerta_abierta = 0;
+        polis = 0;
+        asm("ei");
+
+        for (i = 0; i < len; i++)
         {
-            setErrorCounter(0);
-            LATACLR=(1<<PIN_ZUMBADOR);
-            LATCSET = 0xF;
-            // Do your stuff
-            if (strcmp(pines_acceso[0], s_sub5) == 0)
+            LATCCLR = 0x380;
+            if (!strcmp(pines_acceso[i], s_sub5)) // Se devuelve un 0 si los strings son iguales
             {
-                LATCSET = 0x100;
-                putsUART("\nBienvenido a casa, YAGO");
-                abrirPuerta();
-                asm("di");
-                puerta_abierta = 1;
-                asm("ei");
-            }
-            else if (strcmp(pines_acceso[1], s_sub5)== 0)
-            {
-                LATCSET = 0x100;
-                putsUART("\nBienvenido a casa, LUIS");
-                abrirPuerta();
-                asm("di");
-                puerta_abierta = 1;
-                asm("ei");
-            }
-            else if (strcmp(pines_acceso[2], s_sub5)== 0)
-            {   
-                LATCSET = 0x100;
-                putsUART("\nChema, te queremos. NICE");
-                abrirPuerta();
-                asm("di");
-                puerta_abierta = 1;
-                asm("ei");
-            }else if (strcmp(pines_acceso[3], s_sub5)== 0)
-            {
-                char search[] = "*1CA11CA1";
-                char *ptr = strstr(s, search);
-                
-                if(ptr != NULL){
-                    menuIntro();
+                setErrorCounter(0);
+                LATACLR = (1 << PIN_ZUMBADOR);
+                LATCSET = 0xF;
+                // Do your stuff
+                if (strcmp(pines_acceso[0], s_sub5) == 0)
+                {
+                    LATCSET = 0x100;
+                    putsUART("\nBienvenido a casa, YAGO");
+                    abrirPuerta();
+                    asm("di");
+                    puerta_abierta = 1;
+                    asm("ei");
+                }
+                else if (strcmp(pines_acceso[1], s_sub5) == 0)
+                {
+                    LATCSET = 0x100;
+                    putsUART("\nBienvenido a casa, LUIS");
+                    abrirPuerta();
+                    asm("di");
+                    puerta_abierta = 1;
+                    asm("ei");
+                }
+                else if (strcmp(pines_acceso[2], s_sub5) == 0)
+                {
+                    LATCSET = 0x100;
+                    putsUART("\nChema, te queremos. NICE");
+                    abrirPuerta();
+                    asm("di");
+                    puerta_abierta = 1;
+                    asm("ei");
+                }
+                else if (strcmp(pines_acceso[3], s_sub5) == 0)
+                {
+                    char search[] = "*1CA11CA1";
+                    char *ptr = strstr(s, search);
+
+                    if (ptr != NULL)
+                    {
+                        menuIntro();
+                        break;
+                    }
+                    else
+                    {
+                        putsUART("\nCodigo Incorrecto");
+                        plusErrorCounter(1);
+                        LATCCLR = 0xF;
+                        cerrarPuerta();
+                    }
                     break;
-                }else{
-                    putsUART("\nCodigo Incorrecto");
-                    plusErrorCounter(1);
-                    LATCCLR = 0xF;
-                    cerrarPuerta();
                 }
                 break;
             }
-            break;
-        }
-        else if(i == (len - 1))
-        {
-            if(getErrorCounter() == 1)
+            else if (i == (len - 1))
             {
-                putsUART("\nEs la segunda vez que se inserta un codigo incorrecto.\n");
+                if (getErrorCounter() == 1)
+                {
+                    putsUART("\nEs la segunda vez que se inserta un codigo incorrecto.\n");
+                    plusErrorCounter(1);
+                    cerrarPuerta();
+                    break;
+                }
+                else if (getErrorCounter() == 2)
+                {
+                    putsUART("\nYa es la tercera vez que metes el codigo mal. Llamando a la policia");
+                    cerrarPuerta();
+                    asm("di");
+                    polis = 1;
+                    asm("ei");
+                    // Insertar codigo de Buzzer y cosa externa
+                    break;
+                }
+
+                LATCCLR = 0x380;
+                LATACLR = (1 << PIN_ZUMBADOR);
+                putsUART("\nCodigo Incorrecto");
                 plusErrorCounter(1);
                 cerrarPuerta();
-                break;
-            }else if (getErrorCounter() == 2)
-            {
-                putsUART("\nYa es la tercera vez que metes el codigo mal. Llamando a la policia");
-                cerrarPuerta();
-                asm("di");
-                polis = 1;
-                asm("ei");
-                // Insertar codigo de Buzzer y cosa externa
-                break;
             }
-            
-            LATCCLR = 0x380;
-            LATACLR=(1<<PIN_ZUMBADOR);
-            putsUART("\nCodigo Incorrecto");
-            plusErrorCounter(1);
-            cerrarPuerta();
         }
     }
-    }   
 }
 
 static char pines_acceso_test[][10] = {"1234A", "2151B", "6969C"};
-static char nombres_pines_test[][10] = {"Yago", "Luis", "Chema","Admin"};
+static char nombres_pines_test[][10] = {"Yago", "Luis", "Chema", "Admin"};
 static char pin_admin_test[][10] = {"*1CA11CA1"};
 
 void menuIntro(void)
@@ -417,16 +428,16 @@ void menuIntro(void)
     LATCSET = 0x180;
     int i;
     char option_select;
-    putsUART("\n======= Menu del Sistema =======\n");
+    putsUART("\n== Menu del Sistema ==\n");
     putsUART("Usuarios del sistema:\n");
-    
-    for(i = 0; i < sizeof(nombres_pines_test)/sizeof(nombres_pines_test[0]);i++)
+
+    for (i = 0; i < sizeof(nombres_pines_test) / sizeof(nombres_pines_test[0]); i++)
     {
         putsUART(nombres_pines_test[i]);
         putsUART("\n");
     }
     putsUART("Inserte * para continuar\n");
-    //Para poder pasar a la selección de las opciones del menu
+    // Para poder pasar a la selección de las opciones del menu
     menu_setting = 1; //<- Descomentar para activar para que al escribir caracteres pasemos al otro
 }
 
@@ -437,29 +448,50 @@ void menuSelect(void)
     putsUART("2.Nuevo usuario\n");
     putsUART("3.Eliminar usuario\n");
     putsUART("4.Salir\n");
-    select_option=1;
-    menu_setting=0;
+    select_option = 1;
+    menu_setting = 0;
 };
 
-void selectOption(char s[]){
-    putsUART(s);
-    select_option=0;
-};
-
-
-void modifyPin(void)
+void selectOption(char s[])
 {
-    
+    //Debemos de verificar lo que se le pasa al micro como funcion y despues
+    char s_c[0];
+    int option;
+    s_c[0]=s[0];
+     //Select option para que no vaya a verif 
+    option = charToInt(s_c[0]);
+
+    if(option == 1)
+    {
+        putsUART("Opcion 1");
+        modifyPin();
+    }else if(option == 2)
+    {
+        newUser();
+    }else if(option == 3)
+    {
+        deleteUser(); 
+    }else if(option == 4)
+    {
+        putsUART("\nSaliendo del Menu...\n");
+        select_option = 0;
+    }else
+    {
+        putsUART("\nOpcion Incorrecta. Saliendo del Menu");
+        select_option = 0;
+    }
 };
 
-void newUser(void)
-{
-    
+void modifyPin(void){
+
 };
 
-void deleteUser(void)
-{
-    
+void newUser(void){
+
+};
+
+void deleteUser(void){
+
 };
 
 void setErrorCounter(int counter)
