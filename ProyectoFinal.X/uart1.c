@@ -1,29 +1,9 @@
-/*En primer lugar ha de crear un módulo, denominado UART1 en el que se incluirán todas las funciones
-para el manejo de la UART usando colas e interrupciones. Dicho módulo ha de incluir:
-Dos colas, una para el transmisor y otra para el receptor.
-
-Para que el código esté más claro, cada
-una de estas colas ha de definirse como una estructura de datos junto con sus índices.
-Una función para inicializar el módulo con el prototipo:
-
-void putsUART ( char s []) ;
-
-Una función para extraer un carácter de la cola.
-
-char getcUART ( void ) ;
-
-La rutina de atención a la interrupción.
-
-Recuerde que todas estas funciones han sido vistas en clase. Tan sólo tendrá que modificar la función
-de inicialización para incluir la selección de la velocidad deseada.
-Para probar este módulo se creará un programa que haga el eco de los caracteres recibidos por la
-UART. */
-
 #include <xc.h>
 #include <stdio.h>
 #include <string.h>
 #include "UART1.h"
 #include "I2C.h"
+
 #define TAM_COLA 100
 
 #define PIN_PULSADOR 5
@@ -160,8 +140,8 @@ __attribute__((vector(12), interrupt(IPL2SOFT), nomips16)) void InterrupcionT3(v
         //En el caso de que lleguemos al limite de los latidos del pulsador
         if (tiempo_millis == 20 || tiempo_millis == 0)
         {
-            //Sea cual sea el valor, si es 1, pues bajar�. 
-            //Si es -1, pues subir�.
+            //Sea cual sea el valor, si es 1, pues bajar�. 
+            //Si es -1, pues subir�.
             sube_baja *= -1;
         }
         tick++;
@@ -350,7 +330,6 @@ void verif(char s[])
             // Do your stuff
             if (strcmp(pines_acceso[0], s_sub5) == 0)
             {
-                putsUART("\nCodigo veridico, pase a casa");
                 LATCSET = 0x100;
                 putsUART("\nBienvenido a casa, YAGO");
                 abrirPuerta();
@@ -360,7 +339,6 @@ void verif(char s[])
             }
             else if (strcmp(pines_acceso[1], s_sub5)== 0)
             {
-                putsUART("\nCodigo veridico, pase a casa");
                 LATCSET = 0x100;
                 putsUART("\nBienvenido a casa, LUIS");
                 abrirPuerta();
@@ -369,9 +347,7 @@ void verif(char s[])
                 asm("ei");
             }
             else if (strcmp(pines_acceso[2], s_sub5)== 0)
-            {
-                putsUART("\nCodigo veridico, pase a casa");
-                
+            {   
                 putsUART("\nChema, te queremos. NICE");
                 abrirPuerta();
                 asm("di");
@@ -386,7 +362,7 @@ void verif(char s[])
                     changePasswordSystem();
                     break;
                 }else{
-                    putsUART("\nCodigo Incorrecto, a la siguiente llamo a la policia");
+                    putsUART("\nCodigo Incorrecto");
                     plusErrorCounter(1);
                     LATCCLR = 0xF;
                     cerrarPuerta();
@@ -397,7 +373,11 @@ void verif(char s[])
         }
         else
         {
-            if (getErrorCounter() == 3)
+            if(getErrorCounter() == 1)
+            {
+                putsUART("\nEs la segunda vez que se inserta un codigo incorrecto.\n");
+            }
+            else if (getErrorCounter() == 2)
             {
                 putsUART("\nYa es la tercera vez que metes el codigo mal. Llamando a la policia");
                 cerrarPuerta();
@@ -411,7 +391,7 @@ void verif(char s[])
             {
                 LATCCLR = 0x380;
                 LATACLR=(1<<PIN_ZUMBADOR);
-                putsUART("\nCodigo Incorrecto, a la siguiente llamo a la policia");
+                putsUART("\nCodigo Incorrecto");
                 plusErrorCounter(1);
                 cerrarPuerta();
 
@@ -422,22 +402,72 @@ void verif(char s[])
         
 }
 
+
+static char pines_acceso_test[][10] = {"1234A", "2151B", "6969C"};
+static char nombres_pines_test[][10] = {"Yago", "Luis", "Chema","Admin"};
+static char pin_admin_test[][10] = {"*1CA11CA1"};
+
 void changePasswordSystem(void)
 {
-    int i;
-    char *temp;
-    putsUART("\n======= Menu del Sistema =======\n");
-    putsUART("\n Los usuarios registrados que tiene a continuacion son:\n ");
-    /*for(i = 0; i < sizeof(nombres_pines);i++)
-    {
-        temp=nombres_pines[i];
-        putsUART(temp);
-    }*/
     LATCSET = 0x180;
-    putsUART("==================================\n");
-    putsUART("�Cuales de las siguientes opciones desea elegir?\n1. Modificar contrasenia\n2. Añadir usuario\n3. Eliminar usuario");
-
+    int i, option, filler = 0;
+    char temp[10];
+    char option_select;
+    putsUART("\n======= Menu del Sistema =======\n");
+    putsUART("Usuarios del sistema:\n");
+    
+    for(i = 0; i < sizeof(nombres_pines_test)/sizeof(nombres_pines_test[0]);i++)
+    {
+        //temp = nombres_pines_test[i];
+        putsUART(nombres_pines_test[i]);
+        putsUART("\n");
+    }
+    
+    putsUART("\nOpciones\n");
+    putsUART("1.Modificar PIN\n");
+    putsUART("2.Nuevo usuario\n");
+    putsUART("3.Eliminar usuario\n");
+    putsUART("4.Salir\n");
+    
+    /*Comprobar en caso de errores
+    option_select = getcUART();
+    option = charToInt(option_select);
+    if(option == 1)
+    {
+         
+        modifyPin();
+    }else if(option == 2)
+    {
+        newUser(); 
+    }else if(option == 3)
+    {
+         for(i = 0; i < sizeof(nombres_pines_test)/sizeof(nombres_pines_test[0]);i++)
+    {
+        //temp = nombres_pines_test[i];
+        putsUART(nombres_pines_test[i]);
+        putsUART("\n");
+    }
+        deleteUser(); 
+    }else if(option == 4)
+    {
+        //verif(); <- Retornamos a la secuencia original 
+    }*/
 }
+
+void modifyPin(void)
+{
+    
+};
+
+void newUser(void)
+{
+    
+};
+
+void deleteUser(void)
+{
+    
+};
 
 void setErrorCounter(int counter)
 {

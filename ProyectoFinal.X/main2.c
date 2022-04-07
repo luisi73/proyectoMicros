@@ -34,6 +34,8 @@ int main (void)
     char charmander[10], caracter;
     int i = 0; 
     pulsador_ant = (PORTB>>PIN_PULSADOR) & 1;
+    putsUART("\n=== SISTEMA DE ALARMAS ===\n");
+    
     while(1)
     {
         //Recepcion 

@@ -19,11 +19,18 @@ char getcUART(void);
 void putsUART(char *s);
 int charToInt(char c);
 void verif(char s[]);
+
 void setErrorCounter(int counter);
 void plusErrorCounter(int add_num);
+
 int getErrorCounter(void);
 void changePasswordSystem(void);
 char* convertIntegerToChar(int N);
+
+
+void modifyPin(void);
+void newUser(void);
+void deleteUser(void);
 
 #ifdef	__cplusplus
 }
