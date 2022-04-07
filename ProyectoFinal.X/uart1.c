@@ -359,7 +359,7 @@ void verif(char s[])
                 char *ptr = strstr(s, search);
                 
                 if(ptr != NULL){
-                    changePasswordSystem();
+                    menuIntro();
                     break;
                 }else{
                     putsUART("\nCodigo Incorrecto");
@@ -402,23 +402,20 @@ void verif(char s[])
         
 }
 
-
 static char pines_acceso_test[][10] = {"1234A", "2151B", "6969C"};
 static char nombres_pines_test[][10] = {"Yago", "Luis", "Chema","Admin"};
 static char pin_admin_test[][10] = {"*1CA11CA1"};
 
-void changePasswordSystem(void)
+void menuIntro(void)
 {
     LATCSET = 0x180;
-    int i, option, filler = 0;
-    char temp[10];
+    int i;
     char option_select;
     putsUART("\n======= Menu del Sistema =======\n");
     putsUART("Usuarios del sistema:\n");
     
     for(i = 0; i < sizeof(nombres_pines_test)/sizeof(nombres_pines_test[0]);i++)
     {
-        //temp = nombres_pines_test[i];
         putsUART(nombres_pines_test[i]);
         putsUART("\n");
     }
@@ -429,30 +426,16 @@ void changePasswordSystem(void)
     putsUART("3.Eliminar usuario\n");
     putsUART("4.Salir\n");
     
-    /*Comprobar en caso de errores
-    option_select = getcUART();
-    option = charToInt(option_select);
-    if(option == 1)
-    {
-         
-        modifyPin();
-    }else if(option == 2)
-    {
-        newUser(); 
-    }else if(option == 3)
-    {
-         for(i = 0; i < sizeof(nombres_pines_test)/sizeof(nombres_pines_test[0]);i++)
-    {
-        //temp = nombres_pines_test[i];
-        putsUART(nombres_pines_test[i]);
-        putsUART("\n");
-    }
-        deleteUser(); 
-    }else if(option == 4)
-    {
-        //verif(); <- Retornamos a la secuencia original 
-    }*/
+    //Para poder pasar a la selección de las opciones del menu
+    asm("di");
+    //menu_setting = 1; <- Descomentar para activar para que al escribir caracteres pasemos al otro
+    asm("ei");
 }
+
+void menuSelect(void)
+{
+
+};
 
 void modifyPin(void)
 {

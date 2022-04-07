@@ -17,7 +17,7 @@ devolviendo con putsUART el resultado de dicho comando. */
 #include "UART1.h"
 #include "I2C.h"
 
-#define INC_90_GRADOS 2502 // cada 139 cuentas se giran 10º
+#define INC_90_GRADOS 2502 // cada 139 cuentas se giran 10ï¿½
 #define BAUDIOS 9600
 #define PIN_PULSADOR 5
 #define PIN_PRESENCIA 14
@@ -33,6 +33,7 @@ int main (void)
     //El tamaÃ±o del comando mas largo es de 9 caracteres
     char charmander[10], caracter;
     int i = 0; 
+    static int menu_setting = 0; 
     pulsador_ant = (PORTB>>PIN_PULSADOR) & 1;
     putsUART("\n=== SISTEMA DE ALARMAS ===\n");
     
@@ -53,7 +54,14 @@ int main (void)
         {
             //Fin del comando, pasamos a interpretar el resultado
             i = 0; 
-            verif(charmander);
+            if(menu_setting == 0)
+            {
+                verif(charmander);
+            }else
+            {
+
+            };
+            
             
         }
         

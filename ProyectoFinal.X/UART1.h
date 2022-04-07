@@ -27,7 +27,7 @@ int getErrorCounter(void);
 void changePasswordSystem(void);
 char* convertIntegerToChar(int N);
 
-
+void menuSelect(void);
 void modifyPin(void);
 void newUser(void);
 void deleteUser(void);
