@@ -296,7 +296,7 @@ int charToInt(char c)
         A/B/C       0-F  1/0
     Cambiamos el estado de un pin, si valor = 1 <- LATxSET, en cambio si es 0, LATxCLR
 */
-static int error_counter;
+static int error_counter = 0;
 static char *pines_acceso[] = {"1234A", "2151B", "6969C","*1CA1"};
 static char *nombres_pines[] = {"Yago", "Luis", "Chema","Admin"};
 static char *pin_admin[] = {"*1CA11CA1"};
@@ -375,9 +375,9 @@ void verif(char s[])
         {
             if(getErrorCounter() == 1)
             {
-                putsUART("\nEs la segunda vez que se inserta un codigo incorrecto.\n");
+                putsUART("\n 2o intento.\n");
             }
-            else if (getErrorCounter() == 2)
+            if (getErrorCounter() == 2)
             {
                 putsUART("\nYa es la tercera vez que metes el codigo mal. Llamando a la policia");
                 cerrarPuerta();
@@ -387,7 +387,7 @@ void verif(char s[])
                 // Insertar codigo de Buzzer y cosa externa
                 break;
             }
-            else if (i == (len - 1))
+            if (i == (len - 1))
             {
                 LATCCLR = 0x380;
                 LATACLR=(1<<PIN_ZUMBADOR);
@@ -428,7 +428,7 @@ void menuIntro(void)
     
     //Para poder pasar a la selección de las opciones del menu
     asm("di");
-    menu_setting = 1; <- Descomentar para activar para que al escribir caracteres pasemos al otro
+    //menu_setting = 1; //<- Descomentar para activar para que al escribir caracteres pasemos al otro
     asm("ei");
 }
 
