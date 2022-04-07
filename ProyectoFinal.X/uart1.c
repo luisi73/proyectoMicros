@@ -428,7 +428,7 @@ void menuIntro(void)
     
     //Para poder pasar a la selección de las opciones del menu
     asm("di");
-    //menu_setting = 1; <- Descomentar para activar para que al escribir caracteres pasemos al otro
+    menu_setting = 1; <- Descomentar para activar para que al escribir caracteres pasemos al otro
     asm("ei");
 }
 
