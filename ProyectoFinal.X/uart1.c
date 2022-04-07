@@ -296,7 +296,7 @@ int charToInt(char c)
         A/B/C       0-F  1/0
     Cambiamos el estado de un pin, si valor = 1 <- LATxSET, en cambio si es 0, LATxCLR
 */
-static int error_counter = 0;
+static int error_counter;
 static char *pines_acceso[] = {"1234A", "2151B", "6969C","*1CA1"};
 static char *nombres_pines[] = {"Yago", "Luis", "Chema","Admin"};
 static char *pin_admin[] = {"*1CA11CA1"};
@@ -373,10 +373,12 @@ void verif(char s[])
         }
         else
         {
-            if(getErrorCounter() == 1)
+            /*if(getErrorCounter() == 1)
             {
-                putsUART("\n 2o intento.\n");
-            }
+                putsUART("\nEs la segunda vez que se inserta un codigo incorrecto.\n");
+                cerrarPuerta();
+                break;
+            }*/
             if (getErrorCounter() == 2)
             {
                 putsUART("\nYa es la tercera vez que metes el codigo mal. Llamando a la policia");
