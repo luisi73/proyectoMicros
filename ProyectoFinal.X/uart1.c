@@ -488,7 +488,7 @@ void selectUser(char s[])
 void changePin(char s[])
 {
     putsUART(s);
-    strcpy(pines_acceso[user_selected],s);
+    strcpy(pines_acceso[user_selected-1],s);
     putsUART("PIN CAMBIADO");
     select_pin = 0;
     select_option = 0;
