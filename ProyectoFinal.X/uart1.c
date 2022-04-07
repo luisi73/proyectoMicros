@@ -296,7 +296,7 @@ int charToInt(char c)
         A/B/C       0-F  1/0
     Cambiamos el estado de un pin, si valor = 1 <- LATxSET, en cambio si es 0, LATxCLR
 */
-static int error_counter;
+static int error_counter,select_option=0 , menu_setting=0;
 static char *pines_acceso[] = {"1234A", "2151B", "6969C","*1CA1"};
 static char *nombres_pines[] = {"Yago", "Luis", "Chema","Admin"};
 static char *pin_admin[] = {"*1CA11CA1"};
@@ -312,7 +312,14 @@ void verif(char s[])
     {
         s_sub5[i] = s[i];
     }
-
+    
+    if(menu_setting==1){
+        menuSelect();
+        
+    }else if(select_option==1){
+        selectOption(s);
+    }else{
+    
     asm("di");
     puerta_abierta = 0;
     polis = 0;
@@ -398,7 +405,7 @@ void verif(char s[])
             cerrarPuerta();
         }
     }
-        
+    }   
 }
 
 static char pines_acceso_test[][10] = {"1234A", "2151B", "6969C"};
@@ -418,23 +425,27 @@ void menuIntro(void)
         putsUART(nombres_pines_test[i]);
         putsUART("\n");
     }
-    
+    putsUART("Inserte * para continuar\n");
+    //Para poder pasar a la selección de las opciones del menu
+    menu_setting = 1; //<- Descomentar para activar para que al escribir caracteres pasemos al otro
+}
+
+void menuSelect(void)
+{
     putsUART("\nOpciones\n");
     putsUART("1.Modificar PIN\n");
     putsUART("2.Nuevo usuario\n");
     putsUART("3.Eliminar usuario\n");
     putsUART("4.Salir\n");
-    
-    //Para poder pasar a la selección de las opciones del menu
-    asm("di");
-    //menu_setting = 1; //<- Descomentar para activar para que al escribir caracteres pasemos al otro
-    asm("ei");
-}
-
-void menuSelect(void)
-{
-
+    select_option=1;
+    menu_setting=0;
 };
+
+void selectOption(char s[]){
+    putsUART(s);
+    select_option=0;
+};
+
 
 void modifyPin(void)
 {
