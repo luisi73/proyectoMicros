@@ -20,7 +20,6 @@ devolviendo con putsUART el resultado de dicho comando. */
 #define INC_90_GRADOS 2502 // cada 139 cuentas se giran 10�
 #define BAUDIOS 9600
 #define PIN_PULSADOR 5
-#define PIN_PRESENCIA 14
 
 int main (void)
 {
@@ -50,7 +49,7 @@ int main (void)
             i++;
         }
 
-        if (charmander[i-1]=='\n' && !(PORTB >> PIN_PRESENCIA)&1)
+        if (charmander[i-1]=='\n')
         {
             //Fin del comando, pasamos a interpretar el resultado
             i = 0; 

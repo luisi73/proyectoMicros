@@ -322,7 +322,7 @@ void verif(char s[])
         for (i = 0; i < len; i++)
         {
             LATCCLR = 0x380;
-            if (!strcmp(pines_acceso[i], s_sub5)) // Se devuelve un 0 si los strings son iguales
+            if (!strcmp(pines_acceso[i], s_sub5) && !(PORTB >> PIN_PRESENCIA)&1) // Se devuelve un 0 si los strings son iguales
             {
                 setErrorCounter(0);
                 LATACLR = (1 << PIN_ZUMBADOR);
@@ -376,7 +376,7 @@ void verif(char s[])
                 }
                 break;
             }
-            else if (i == (len - 1))
+            else if (i == (len - 1)&& !(PORTB >> PIN_PRESENCIA)&1)
             {
                 if (getErrorCounter() == 1)
                 {
@@ -400,6 +400,11 @@ void verif(char s[])
                 LATACLR = (1 << PIN_ZUMBADOR);
                 putsUART("\nCodigo Incorrecto");
                 plusErrorCounter(1);
+                cerrarPuerta();
+            }else if(i == (len - 1)){
+                LATCCLR = 0x380;
+                LATACLR = (1 << PIN_ZUMBADOR);
+                putsUART("\nAcercate a la puerta");
                 cerrarPuerta();
             }
         }
