@@ -54,13 +54,8 @@ int main (void)
         {
             //Fin del comando, pasamos a interpretar el resultado
             i = 0; 
-            if(menu_setting == 0)
-            {
-                verif(charmander);
-            }else
-            {
-
-            };
+            verif(charmander);
+  
         }
         
         // Se lee el estado del pulsador
