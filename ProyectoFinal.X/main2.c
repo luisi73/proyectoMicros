@@ -61,8 +61,6 @@ int main (void)
             {
 
             };
-            
-            
         }
         
         // Se lee el estado del pulsador
