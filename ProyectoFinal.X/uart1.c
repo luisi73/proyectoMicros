@@ -506,14 +506,14 @@ void modifyPin(void){
         putsUART(nombres_pines[i]);
         putsUART("\n");
     }
-  putsUART("\n¿De que usuario quiere cambiar el PIN?\n");
+  putsUART("\nÂ¿De que usuario quiere cambiar el PIN?\n");
   select_user = 1;
   select_option = 0;
 };
 
 void selectUser(char s[])
 {
-    //Reseteamos para que no se vuelva a meter en la función.
+    //Reseteamos para que no se vuelva a meter en la funciï¿½n.
     select_user=0;
     user_selected = charToInt(s[0]);
     putsUART("INSERTAR NUEVO PIN\nDeben de tener longitud 5");
