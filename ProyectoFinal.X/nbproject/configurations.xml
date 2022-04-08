@@ -16,10 +16,9 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>servo.c</itemPath>
-      <itemPath>main2.c</itemPath>
       <itemPath>uart1.c</itemPath>
       <itemPath>Pic32Ini.c</itemPath>
-      <itemPath>I2C.c</itemPath>
+      <itemPath>main.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -42,7 +41,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PK3OBPlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>4.00</languageToolchainVersion>
+        <languageToolchainVersion>3.01</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -211,12 +210,11 @@
         <property key="stack-smashing" value=""/>
         <property key="wpo-lto" value="false"/>
       </C32Global>
+      <item path="I2C.h" ex="true" overriding="false">
+      </item>
       <PK3OBPlatformTool>
         <property key="firmware.download.all" value="false"/>
       </PK3OBPlatformTool>
-      <Tool>
-        <property key="firmware.download.all" value="false"/>
-      </Tool>
       <item path="servo.c" ex="true" overriding="false">
         <C32>
         </C32>

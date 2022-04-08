@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=main2.c uart1.c Pic32Ini.c I2C.c
+SOURCEFILES_QUOTED_IF_SPACED=uart1.c Pic32Ini.c main.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/main2.o ${OBJECTDIR}/uart1.o ${OBJECTDIR}/Pic32Ini.o ${OBJECTDIR}/I2C.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/main2.o.d ${OBJECTDIR}/uart1.o.d ${OBJECTDIR}/Pic32Ini.o.d ${OBJECTDIR}/I2C.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/uart1.o ${OBJECTDIR}/Pic32Ini.o ${OBJECTDIR}/main.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/uart1.o.d ${OBJECTDIR}/Pic32Ini.o.d ${OBJECTDIR}/main.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/main2.o ${OBJECTDIR}/uart1.o ${OBJECTDIR}/Pic32Ini.o ${OBJECTDIR}/I2C.o
+OBJECTFILES=${OBJECTDIR}/uart1.o ${OBJECTDIR}/Pic32Ini.o ${OBJECTDIR}/main.o
 
 # Source Files
-SOURCEFILES=main2.c uart1.c Pic32Ini.c I2C.c
+SOURCEFILES=uart1.c Pic32Ini.c main.c
 
 
 
@@ -107,12 +107,6 @@ endif
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-${OBJECTDIR}/main2.o: main2.c  .generated_files/2d8469b64b87e3097e5055aefc3c4cd42302e57b.flag .generated_files/c16260e2e706dfe12f08df97fe13d43c78b3d226.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/main2.o.d 
-	@${RM} ${OBJECTDIR}/main2.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MP -MMD -MF "${OBJECTDIR}/main2.o.d" -o ${OBJECTDIR}/main2.o main2.c    -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)    
-	
 ${OBJECTDIR}/uart1.o: uart1.c  .generated_files/9edad9df8c86af39e076efe853aba3e512c681a4.flag .generated_files/c16260e2e706dfe12f08df97fe13d43c78b3d226.flag
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/uart1.o.d 
@@ -125,19 +119,13 @@ ${OBJECTDIR}/Pic32Ini.o: Pic32Ini.c  .generated_files/42516fe63ca5b72263ca880466
 	@${RM} ${OBJECTDIR}/Pic32Ini.o 
 	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MP -MMD -MF "${OBJECTDIR}/Pic32Ini.o.d" -o ${OBJECTDIR}/Pic32Ini.o Pic32Ini.c    -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)    
 	
-${OBJECTDIR}/I2C.o: I2C.c  .generated_files/cdb9058cf5b5792286e1a0c831f4a9cff5a38bdc.flag .generated_files/c16260e2e706dfe12f08df97fe13d43c78b3d226.flag
+${OBJECTDIR}/main.o: main.c  .generated_files/671232e0db3fff03da0b570e1f166ceef48f6710.flag .generated_files/c16260e2e706dfe12f08df97fe13d43c78b3d226.flag
 	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/I2C.o.d 
-	@${RM} ${OBJECTDIR}/I2C.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MP -MMD -MF "${OBJECTDIR}/I2C.o.d" -o ${OBJECTDIR}/I2C.o I2C.c    -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)    
+	@${RM} ${OBJECTDIR}/main.o.d 
+	@${RM} ${OBJECTDIR}/main.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MP -MMD -MF "${OBJECTDIR}/main.o.d" -o ${OBJECTDIR}/main.o main.c    -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)    
 	
 else
-${OBJECTDIR}/main2.o: main2.c  .generated_files/695a5100bb9b7ba440106a7f7f686b3ae8ef9567.flag .generated_files/c16260e2e706dfe12f08df97fe13d43c78b3d226.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/main2.o.d 
-	@${RM} ${OBJECTDIR}/main2.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MP -MMD -MF "${OBJECTDIR}/main2.o.d" -o ${OBJECTDIR}/main2.o main2.c    -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)    
-	
 ${OBJECTDIR}/uart1.o: uart1.c  .generated_files/98dcbd0debc9d8770bff221acde1f6b97789dfd6.flag .generated_files/c16260e2e706dfe12f08df97fe13d43c78b3d226.flag
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/uart1.o.d 
@@ -150,11 +138,11 @@ ${OBJECTDIR}/Pic32Ini.o: Pic32Ini.c  .generated_files/22ea22d4d67fba83f812595dee
 	@${RM} ${OBJECTDIR}/Pic32Ini.o 
 	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MP -MMD -MF "${OBJECTDIR}/Pic32Ini.o.d" -o ${OBJECTDIR}/Pic32Ini.o Pic32Ini.c    -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)    
 	
-${OBJECTDIR}/I2C.o: I2C.c  .generated_files/679c0ba2cd4df5784f3df291fe714721094f0467.flag .generated_files/c16260e2e706dfe12f08df97fe13d43c78b3d226.flag
+${OBJECTDIR}/main.o: main.c  .generated_files/dcd82c15aa1fd9941df563b3c4b780a1b4c0a59e.flag .generated_files/c16260e2e706dfe12f08df97fe13d43c78b3d226.flag
 	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/I2C.o.d 
-	@${RM} ${OBJECTDIR}/I2C.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MP -MMD -MF "${OBJECTDIR}/I2C.o.d" -o ${OBJECTDIR}/I2C.o I2C.c    -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)    
+	@${RM} ${OBJECTDIR}/main.o.d 
+	@${RM} ${OBJECTDIR}/main.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MP -MMD -MF "${OBJECTDIR}/main.o.d" -o ${OBJECTDIR}/main.o main.c    -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)    
 	
 endif
 

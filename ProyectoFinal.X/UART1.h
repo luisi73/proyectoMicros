@@ -13,12 +13,13 @@ extern "C" {
 #endif
 
 void InicializarPines(int baudios);
-void abrirPuerta(void);
-void cerrarPuerta(void);
 char getcUART(void);
 void putsUART(char *s);
 int charToInt(char c);
 void verif(char s[]);
+
+void abrirPuerta(void);
+void cerrarPuerta(void);
 
 void setErrorCounter(int counter);
 void plusErrorCounter(int add_num);

@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "UART1.h"
-#include "I2C.h"
 
 #define TAM_COLA 100
 
@@ -32,6 +31,7 @@ typedef struct
 
 static cola_t tx, rx;
 
+//============ SETUP INICIALIZACION =======================
 void InicializarPines(int baudios)
 {
 
@@ -114,75 +114,8 @@ void InicializarPines(int baudios)
     T3CON = 0x8000;    // Se arranca el timer una vez configurada la interrupci�on
 }
 
-__attribute__((vector(12), interrupt(IPL2SOFT), nomips16)) void InterrupcionT3(void)
-{
-    static uint32_t sound = 0, tick = 0, ticks = 0, seg = 0;
-    uint16_t tiempo_millis = 0;
-    int sube_baja = 1;
-    IFS0bits.T3IF = 0;
-    if (puerta_abierta == 1)
-    { // Solo cuenta si abierta
-        ticks++;
-        if (ticks >= 2000)
-        { // 1 seg, ticks
-            seg++;
-            ticks = 0;
-        }
-    }
-    else
-    { // Mantengo todo a 0 en caso contrario
-        ticks = 0;
-        seg = 0;
-    }
+// =========== FUNCIONES PARA EL MANEJO DE LA UART  ========
 
-    if (polis == 1)
-    {
-        tiempo_millis += sube_baja;
-        // En el caso de que lleguemos al limite de los latidos del pulsador
-        if (tiempo_millis == 20 || tiempo_millis == 0)
-        {
-            // Sea cual sea el valor, si es 1, pues bajar�.
-            // Si es -1, pues subir�.
-            sube_baja *= -1;
-        }
-        tick++;
-        sound++;
-        if (tick >= 2000)
-        {
-            tick = 0;
-            LATCINV = 0x200;
-        }
-        else
-        {
-            LATCINV = 0x80;
-        }
-        if (sound >= (2 - tiempo_millis))
-        {
-            LATAINV = (1 << PIN_ZUMBADOR);
-            sound = 0;
-        }
-    }
-
-    if (seg >= 30)
-    { // 30s
-        cerrarPuerta();
-        seg = 0;
-    }
-}
-void abrirPuerta(void)
-{
-    int t_alto = 5000; // Tiempo en alto de la salida (1 ms)
-
-    OC1RS = t_alto;
-}
-void cerrarPuerta(void)
-{
-    int t_alto = 2500; // Tiempo en alto de la salida (1 ms)
-
-    OC1RS = t_alto;
-}
-
-// Rutina de la interrupcion que va a permitir la comunicacion de la UART
 __attribute__((vector(32), interrupt(IPL3SOFT), nomips16)) void InterrupcionUART1(void)
 {
     if (IFS1bits.U1RXIF == 1)
@@ -266,12 +199,115 @@ void putsUART(char *s)
     }
 }
 
+
+//============ FUNCIONES PARA EL MANEJO DEL SERVO =========
+void abrirPuerta(void)
+{
+    int t_alto = 5000; // Tiempo en alto de la salida (1 ms)
+
+    OC1RS = t_alto;
+}
+
+void cerrarPuerta(void)
+{
+    int t_alto = 2500; // Tiempo en alto de la salida (1 ms)
+
+    OC1RS = t_alto;
+}
+
+__attribute__((vector(12), interrupt(IPL2SOFT), nomips16)) void InterrupcionT3(void)
+{
+    static uint32_t sound = 0, tick = 0, ticks = 0, seg = 0;
+    uint16_t tiempo_millis = 0;
+    int sube_baja = 1;
+    IFS0bits.T3IF = 0;
+    if (puerta_abierta == 1)
+    { // Solo cuenta si abierta
+        ticks++;
+        if (ticks >= 2000)
+        { // 1 seg, ticks
+            seg++;
+            ticks = 0;
+        }
+    }
+    else
+    { // Mantengo todo a 0 en caso contrario
+        ticks = 0;
+        seg = 0;
+    }
+
+    if (polis == 1)
+    {
+        tiempo_millis += sube_baja;
+        // En el caso de que lleguemos al limite de los latidos del pulsador
+        if (tiempo_millis == 20 || tiempo_millis == 0)
+        {
+            // Sea cual sea el valor, si es 1, pues bajar�.
+            // Si es -1, pues subir�.
+            sube_baja *= -1;
+        }
+        tick++;
+        sound++;
+        if (tick >= 2000)
+        {
+            tick = 0;
+            LATCINV = 0x200;
+        }
+        else
+        {
+            LATCINV = 0x80;
+        }
+        if (sound >= (2 - tiempo_millis))
+        {
+            LATAINV = (1 << PIN_ZUMBADOR);
+            sound = 0;
+        }
+    }
+
+    if (seg >= 30)
+    { // 30s
+        cerrarPuerta();
+        seg = 0;
+    }
+}
+
+
+// ============ FUNCIONES PARA MANEJAR LOS ERRORES DEL PIN =======
+void setErrorCounter(int counter)
+{
+    asm("   di");
+    error_counter = counter;
+    asm("   ei");
+}
+
+void plusErrorCounter(int add_num)
+{
+    asm("   di");
+    error_counter += add_num;
+    asm("   ei");
+}
+
+int getErrorCounter(void)
+{
+    int c_error_counter;
+    asm("   di");
+    c_error_counter = error_counter;
+    asm("   ei");
+    return c_error_counter;
+}
+
 //==============================================
-// <?> Seccion Correspondiente al Bluetooth Bit-Whacker
+// FUNCIONES CORRESPONDIENTES AL MENU
 //==============================================
 static int pin, valor, estado;
 static char puerto;
 char response[10];
+
+static int error_counter, select_option = 0, select_user = 0, select_pin=0, user_selected;
+static char pines_acceso[][10] = {"1234A", "2151B", "6969C", "*1CA1"};
+static char nombres_pines[][10] = {"Yago", "Luis", "Chema", "Admin"};
+static char pin_admin[][10] = {"*1CA11CA1"};
+
 
 // Apuntes pendientes aqui
 int charToInt(char c)
@@ -283,12 +319,6 @@ int charToInt(char c)
     else
         return -1;
 }
-
-
-static int error_counter, select_option = 0, select_user = 0, select_pin=0, user_selected;
-static char pines_acceso[][10] = {"1234A", "2151B", "6969C", "*1CA1"};
-static char nombres_pines[][10] = {"Yago", "Luis", "Chema", "Admin"};
-static char pin_admin[][10] = {"*1CA11CA1"};
 
 void verif(char s[])
 {
@@ -411,6 +441,7 @@ void verif(char s[])
     }
 }
 
+//========  FUNCIONES MENU  ========================
 void menuIntro(void)
 {
     LATCSET = 0x180;
@@ -501,74 +532,6 @@ void changePin(char s[])
 }
 
 
-void setErrorCounter(int counter)
-{
-    asm("   di");
-    error_counter = counter;
-    asm("   ei");
-}
-
-void plusErrorCounter(int add_num)
-{
-    asm("   di");
-    error_counter += add_num;
-    asm("   ei");
-}
-
-int getErrorCounter(void)
-{
-    int c_error_counter;
-    asm("   di");
-    c_error_counter = error_counter;
-    asm("   ei");
-    return c_error_counter;
-}
 
 
-/*
-// You must free the result if result is non-NULL.
-char *str_replace(char *orig, char *rep, char *with) {
-    char *result; // the return string
-    char *ins;    // the next insert point
-    char *tmp;    // varies
-    int len_rep;  // length of rep (the string to remove)
-    int len_with; // length of with (the string to replace rep with)
-    int len_front; // distance between rep and end of last rep
-    int count;    // number of replacements
 
-    // sanity checks and initialization
-    if (!orig || !rep)
-        return NULL;
-    len_rep = strlen(rep);
-    if (len_rep == 0)
-        return NULL; // empty rep causes infinite loop during count
-    if (!with)
-        with = "";
-    len_with = strlen(with);
-
-    // count the number of replacements needed
-    ins = orig;
-    for (count = 0; tmp = strstr(ins, rep); ++count) {
-        ins = tmp + len_rep;
-    }
-
-    tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
-
-    if (!result)
-        return NULL;
-
-    // first time through the loop, all the variable are set correctly
-    // from here on,
-    //    tmp points to the end of the result string
-    //    ins points to the next occurrence of rep in orig
-    //    orig points to the remainder of orig after "end of rep"
-    while (count--) {
-        ins = strstr(orig, rep);
-        len_front = ins - orig;
-        tmp = strncpy(tmp, orig, len_front) + len_front;
-        tmp = strcpy(tmp, with) + len_with;
-        orig += len_front + len_rep; // move to next "end of rep"
-    }
-    strcpy(tmp, orig);
-    return result;
-}*/
