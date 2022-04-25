@@ -3,8 +3,6 @@
 #include <string.h>
 #include "error.h"
 
-
-
 // ============ FUNCIONES PARA MANEJAR LOS ERRORES DEL PIN =======
 void setErrorCounter(int counter)
 {
