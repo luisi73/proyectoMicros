@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "UART1.h"
-#include "error.h"
-#include "menu.h"
 
 #define TAM_COLA 100
 
@@ -202,19 +200,6 @@ void putsUART(char *s)
 }
 
 //============ FUNCIONES PARA EL MANEJO DEL SERVO =========
-void abrirPuerta(void)
-{
-    int t_alto = 5000; // Tiempo en alto de la salida (1 ms)
-
-    OC1RS = t_alto;
-}
-
-void cerrarPuerta(void)
-{
-    int t_alto = 2500; // Tiempo en alto de la salida (1 ms)
-
-    OC1RS = t_alto;
-}
 
 __attribute__((vector(12), interrupt(IPL2SOFT), nomips16)) void InterrupcionT3(void)
 {

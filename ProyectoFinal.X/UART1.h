@@ -1,4 +1,3 @@
-
 #ifndef UART1_H
 #define UART1_H
 
@@ -11,13 +10,6 @@ extern "C"
     char getcUART(void);
     void putsUART(char *s);
     void verif(char s[]);
-
-    void abrirPuerta(void);
-    void cerrarPuerta(void);
-
-    void changePasswordSystem(void);
-    char *convertIntegerToChar(int N);
-
 
 #ifdef __cplusplus
 }
