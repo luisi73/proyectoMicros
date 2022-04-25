@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.rmd": "markdown",
+        "uart1.h": "c",
+        "menu.h": "c"
+    }
+}
