@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   UART1.h
  * Author: daniel
  *
@@ -6,37 +6,37 @@
  */
 
 #ifndef UART1_H
-#define	UART1_H
+#define UART1_H
 
-#ifdef	__cplusplus
-extern "C" {
+#ifdef __cplusplus
+extern "C"
+{
 #endif
 
-void InicializarPines(int baudios);
-char getcUART(void);
-void putsUART(char *s);
-int charToInt(char c);
-void verif(char s[]);
+    void InicializarPines(int baudios);
+    char getcUART(void);
+    void putsUART(char *s);
+    int charToInt(char c);
+    void verif(char s[]);
 
-void abrirPuerta(void);
-void cerrarPuerta(void);
+    void abrirPuerta(void);
+    void cerrarPuerta(void);
 
-void setErrorCounter(int counter);
-void plusErrorCounter(int add_num);
+    void setErrorCounter(int counter);
+    void plusErrorCounter(int add_num);
 
-int getErrorCounter(void);
-void changePasswordSystem(void);
-char* convertIntegerToChar(int N);
+    int getErrorCounter(void);
+    void changePasswordSystem(void);
+    char *convertIntegerToChar(int N);
 
-void menuSelect(void);
-void selectOption(char s[]);
-void modifyPin(void);
-void selectUser(char s[]);
-void changePin(char s[]);
+    void menuSelect(void);
+    void selectOption(char s[]);
+    void modifyPin(void);
+    void selectUser(char s[]);
+    void changePin(char s[]);
 
-#ifdef	__cplusplus
+#ifdef __cplusplus
 }
 #endif
 
-#endif	/* UART1_H */
-
+#endif /* UART1_H */

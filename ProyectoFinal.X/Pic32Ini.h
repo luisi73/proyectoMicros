@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   Pic32Ini.h
  * Author: daniel
  *
@@ -6,18 +6,17 @@
  */
 
 #ifndef PIC32INI_H
-#define	PIC32INI_H
+#define PIC32INI_H
 
-#ifdef	__cplusplus
-extern "C" {
+#ifdef __cplusplus
+extern "C"
+{
 #endif
 
-void InicializarReloj(void);
+    void InicializarReloj(void);
 
-
-#ifdef	__cplusplus
+#ifdef __cplusplus
 }
 #endif
 
-#endif	/* PIC32INI_H */
-
+#endif /* PIC32INI_H */
