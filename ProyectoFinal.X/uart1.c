@@ -31,6 +31,15 @@ typedef struct
 
 static cola_t tx, rx;
 
+static int pin, valor, estado;
+static char puerto;
+char response[10];
+
+static int error_counter, select_option = 0, select_user = 0, select_pin = 0, user_selected;
+static char pines_acceso[][10] = {"1234A", "2151B", "6969C", "*1CA1"};
+static char nombres_pines[][10] = {"Yago", "Luis", "Chema", "Admin"};
+static char pin_admin[][10] = {"*1CA11CA1"};
+
 //============ SETUP INICIALIZACION =======================
 void InicializarPines(int baudios)
 {
@@ -114,7 +123,7 @@ void InicializarPines(int baudios)
     T3CON = 0x8000;    // Se arranca el timer una vez configurada la interrupci�on
 }
 
-// =========== FUNCIONES PARA EL MANEJO DE LA UART  ========
+//============ INTERRUPCIONES DEL PROYECTO =======================
 
 __attribute__((vector(32), interrupt(IPL3SOFT), nomips16)) void InterrupcionUART1(void)
 {
@@ -155,63 +164,6 @@ __attribute__((vector(32), interrupt(IPL3SOFT), nomips16)) void InterrupcionUART
         }
         IFS1bits.U1TXIF = 0;
     }
-}
-
-char getcUART(void)
-{
-    char c;
-    if (rx.icola != rx.icabeza)
-    {
-        c = rx.cola[rx.icola];
-        rx.icola++;
-        if (rx.icola == TAM_COLA)
-        {
-            rx.icola = 0;
-        }
-    }
-    else
-    {
-        c = '\0';
-    }
-    return c;
-}
-
-void putsUART(char *s)
-{
-    while (*s != '\0')
-    {
-        if ((tx.icabeza + 1 == tx.icola) || (tx.icabeza + 1 == TAM_COLA && tx.icola == 0))
-        {
-            break;
-        }
-        else
-        {
-            tx.cola[tx.icabeza] = *s;
-            s++;
-            tx.icabeza++;
-            if (tx.icabeza == TAM_COLA)
-            {
-                tx.icabeza = 0;
-            }
-        }
-
-        IEC1bits.U1TXIE = 1;
-    }
-}
-
-//============ FUNCIONES PARA EL MANEJO DEL SERVO =========
-void abrirPuerta(void)
-{
-    int t_alto = 5000; // Tiempo en alto de la salida (1 ms)
-
-    OC1RS = t_alto;
-}
-
-void cerrarPuerta(void)
-{
-    int t_alto = 2500; // Tiempo en alto de la salida (1 ms)
-
-    OC1RS = t_alto;
 }
 
 __attribute__((vector(12), interrupt(IPL2SOFT), nomips16)) void InterrupcionT3(void)
@@ -270,6 +222,66 @@ __attribute__((vector(12), interrupt(IPL2SOFT), nomips16)) void InterrupcionT3(v
     }
 }
 
+// =========== FUNCIONES PARA EL MANEJO DE LA UART  ========
+
+char getcUART(void)
+{
+    char c;
+    if (rx.icola != rx.icabeza)
+    {
+        c = rx.cola[rx.icola];
+        rx.icola++;
+        if (rx.icola == TAM_COLA)
+        {
+            rx.icola = 0;
+        }
+    }
+    else
+    {
+        c = '\0';
+    }
+    return c;
+}
+
+void putsUART(char *s)
+{
+    while (*s != '\0')
+    {
+        if ((tx.icabeza + 1 == tx.icola) || (tx.icabeza + 1 == TAM_COLA && tx.icola == 0))
+        {
+            break;
+        }
+        else
+        {
+            tx.cola[tx.icabeza] = *s;
+            s++;
+            tx.icabeza++;
+            if (tx.icabeza == TAM_COLA)
+            {
+                tx.icabeza = 0;
+            }
+        }
+
+        IEC1bits.U1TXIE = 1;
+    }
+}
+
+//============ FUNCIONES PARA EL MANEJO DEL SERVO =========
+
+void abrirPuerta(void)
+{
+    int t_alto = 5000; // Tiempo en alto de la salida (1 ms)
+
+    OC1RS = t_alto;
+}
+
+void cerrarPuerta(void)
+{
+    int t_alto = 2500; // Tiempo en alto de la salida (1 ms)
+
+    OC1RS = t_alto;
+}
+
 // ============ FUNCIONES PARA MANEJAR LOS ERRORES DEL PIN =======
 void setErrorCounter(int counter)
 {
@@ -295,16 +307,8 @@ int getErrorCounter(void)
 }
 
 //==============================================
-// FUNCIONES CORRESPONDIENTES AL MENU
+// VERIFICACION DEL MENSAJE
 //==============================================
-static int pin, valor, estado;
-static char puerto;
-char response[10];
-
-static int error_counter, select_option = 0, select_user = 0, select_pin = 0, user_selected;
-static char pines_acceso[][10] = {"1234A", "2151B", "6969C", "*1CA1"};
-static char nombres_pines[][10] = {"Yago", "Luis", "Chema", "Admin"};
-static char pin_admin[][10] = {"*1CA11CA1"};
 
 // Apuntes pendientes aqui
 int charToInt(char c)
@@ -442,7 +446,9 @@ void verif(char s[])
     }
 }
 
-//========  FUNCIONES MENU  ========================
+//==============================================
+//========  FUNCIONES MENU  ====================
+//==============================================
 void menuIntro(void)
 {
     LATCSET = 0x180;
