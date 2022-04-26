@@ -22,6 +22,15 @@
 uint8_t puerta_abierta = 0;
 uint8_t polis = 0;
 
+static int pin, valor, estado;
+static char puerto;
+char response[10];
+
+static int error_counter, select_option = 0, select_user = 0, select_pin = 0, user_selected;
+static char pines_acceso[][10] = {"1234A", "2151B", "6969C", "*1CA1"};
+static char nombres_pines[][10] = {"Yago", "Luis", "Chema", "Admin"};
+static char pin_admin[][10] = {"*1CA11CA1"};
+
 typedef struct
 {
     int icabeza;
@@ -297,14 +306,7 @@ int getErrorCounter(void)
 //==============================================
 // FUNCIONES CORRESPONDIENTES AL MENU
 //==============================================
-static int pin, valor, estado;
-static char puerto;
-char response[10];
 
-static int error_counter, select_option = 0, select_user = 0, select_pin = 0, user_selected;
-static char pines_acceso[][10] = {"1234A", "2151B", "6969C", "*1CA1"};
-static char nombres_pines[][10] = {"Yago", "Luis", "Chema", "Admin"};
-static char pin_admin[][10] = {"*1CA11CA1"};
 
 // Apuntes pendientes aqui
 int charToInt(char c)
@@ -470,7 +472,7 @@ void selectOption(char s[])
     }
     else if (option == 2)
     {
-        mostarUsuarios();
+        mostrarUsuarios();
     }
     else if (option == 3)
     {
@@ -484,7 +486,7 @@ void selectOption(char s[])
     }
 };
 
-void mostarUsuarios(void)
+void mostrarUsuarios(void)
 {
     putsUART("\nUsuarios del sistema:\n");
     int i;

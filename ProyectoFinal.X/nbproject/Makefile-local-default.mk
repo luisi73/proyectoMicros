@@ -35,3 +35,4 @@ MP_AS_DIR="C:\Program Files\Microchip\xc32\v3.01\bin"
 MP_LD_DIR="C:\Program Files\Microchip\xc32\v3.01\bin"
 MP_AR_DIR="C:\Program Files\Microchip\xc32\v3.01\bin"
 # MP_BC_DIR is not defined
+DFP_DIR=C:/Users/Yago T/.mchp_packs/Microchip/PIC32MX_DFP/1.5.259
